@@ -1,0 +1,19 @@
+LIBRARY
+EXPORTS
+	GetFileVersionInfoA		 = ExpFunc001 @1
+	GetFileVersionInfoByHandle	 = ExpFunc002 @2
+	GetFileVersionInfoExA		 = ExpFunc003 @3
+	GetFileVersionInfoExW		 = ExpFunc004 @4
+	GetFileVersionInfoSizeA		 = ExpFunc005 @5
+	GetFileVersionInfoSizeExA	 = ExpFunc006 @6
+	GetFileVersionInfoSizeExW	 = ExpFunc007 @7
+	GetFileVersionInfoSizeW		 = ExpFunc008 @8
+	GetFileVersionInfoW		 = ExpFunc009 @9
+	VerFindFileA			 = ExpFunc010 @10
+	VerFindFileW			 = ExpFunc011 @11
+	VerInstallFileA			 = ExpFunc012 @12
+	VerInstallFileW			 = ExpFunc013 @13
+	VerLanguageNameA		 = ExpFunc014 @14
+	VerLanguageNameW		 = ExpFunc015 @15
+	VerQueryValueA			 = ExpFunc016 @16
+	VerQueryValueW			 = ExpFunc017 @17
