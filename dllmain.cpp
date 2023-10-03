@@ -16,7 +16,11 @@ void HijackDll()
 	WCHAR wcsDllPath[MAX_PATH];
 	GetSystemDirectory(wcsDllPath, MAX_PATH);
 	PathCombine(wcsDllPath, wcsDllPath, L"VERSION.dll");
+
 	HMODULE hModule = LoadLibrary(wcsDllPath);
+	if (hModule == NULL)
+		return;
+
 	fpAddr[0] = GetProcAddress(hModule, "GetFileVersionInfoA");
 	fpAddr[1] = GetProcAddress(hModule, "GetFileVersionInfoByHandle");
 	fpAddr[2] = GetProcAddress(hModule, "GetFileVersionInfoExA");
@@ -41,6 +45,8 @@ HMODULE WINAPI h_LoadLibraryW(LPCWSTR lpLibFileName)
 	auto pResult = o_LoadLibraryW(lpLibFileName);
 	if (pResult != NULL) {
 
+		bool bIsFound = false;
+
 		MODULEINFO mInfo;
 		HANDLE hProcess = GetCurrentProcess();
 		GetModuleInformation(hProcess, pResult, &mInfo, sizeof(mInfo));
@@ -48,12 +54,24 @@ HMODULE WINAPI h_LoadLibraryW(LPCWSTR lpLibFileName)
 		auto pAddr = (PBYTE)pResult;
 		for (size_t i = 0; i < mInfo.SizeOfImage - 20; i++) {
 			if (memcmp(pAddr + i, L"bootStrap", 20) == 0) {
-				WriteProcessMemory(hProcess, pAddr + 0xC3B8, "\x0", 1, NULL);
-				WriteProcessMemory(hProcess, pAddr + 0xD90D, "\xB3\x01", 2, NULL);
 				DetourTransactionBegin();
 				DetourDetach(&o_LoadLibraryW, h_LoadLibraryW);
 				DetourTransactionCommit();
+				bIsFound = true;
 				break;
+			}
+		}
+
+		if (bIsFound) {
+			for (size_t i = 0; i < mInfo.SizeOfImage - 16; i++) {
+				if (memcmp(pAddr + i, "\x74\x04\xB0\x01\x5D\xC3\x32\xC0\x5D\xC3", 10) == 0) {
+					WriteProcessMemory(hProcess, pAddr + i, "\x74\x00", 2, NULL);
+					continue;
+				}
+				if (memcmp(pAddr + i, "\x84\xDB\x74\x19\xB8\x17\xFC\xFF\xFF\x8B\x4D\xF4", 12) == 0) {
+					WriteProcessMemory(hProcess, pAddr + i, "\xB3\x01", 2, NULL);
+					continue;
+				}
 			}
 		}
 	}
